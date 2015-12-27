@@ -189,9 +189,9 @@ Custom property | Description | Default
       }*/
 
       /* NOTE: This is not needed, calculated by _computeMainStyle() */
-      .left-drawer > #main {
+      /*.left-drawer > #main {
         left: auto;
-      }
+      }*/
 
       #main > ::content > [main] {
         height: 100%;
@@ -216,29 +216,37 @@ Custom property | Description | Default
         @apply(--paper-drawer-panel-scrim);
       }
 
-      .narrow-layout > .drawer {
+      .narrow-layout > .drawer,
+      .left-drawer-temporary > #leftDrawer,
+      .right-drawer-temporary > #rightDrawer {
         will-change: transform;
       }
 
-      .narrow-layout > #leftDrawer.iron-selected {
+      .narrow-layout > #leftDrawer.iron-selected,
+      .left-drawer-temporary > #leftDrawer.iron-selected {
         box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
-      .narrow-layout > #rightDrawer.iron-selected {
+      .narrow-layout > #rightDrawer.iron-selected,
+      .left-drawer-temporary > #leftDrawer.ironSelected {
         box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
       .narrow-layout > .drawer > ::content > [left-drawer],
-      .narrow-layout > .drawer > ::content > [right-drawer] {
+      .narrow-layout > .drawer > ::content > [right-drawer],
+      .left-drawer-temporary > #leftDrawer > ::content > [left-drawer],
+      .right-drawer-temporary > #rightDrawer > ::content > [right-drawer] {
         border: 0;
       }
 
-      .narrow-layout > #leftDrawer:not(.iron-selected) {
+      .narrow-layout > #leftDrawer:not(.iron-selected),
+      .left-drawer-temporary > #leftDrawer:not(.iron-selected) {
         -webkit-transform: translateX(-100%);
         transform: translateX(-100%);
       }
 
-      .narrow-layout > #rightDrawer:not(.iron-selected) {
+      .narrow-layout > #rightDrawer:not(.iron-selected),
+      .right-drawer-temporary > #rightDrawer:not(.iron-selected) {
         left: auto;
         visibility: hidden;
 
@@ -247,18 +255,17 @@ Custom property | Description | Default
       }
 
       .narrow-layout.dragging > .drawer:not(.iron-selected),
-      .narrow-layout.peeking > .drawer:not(.iron-selected) {
+      .narrow-layout.peeking > .drawer:not(.iron-selected),
+      .left-drawer-temporary.dragging > #leftDrawer:not(.iron-selected),
+      .left-drawer-temporary.peeking > #leftDrawer:not(.iron-selected),
+      .right-drawer-temporary.dragging > #rightDrawer:not(.iron-selected),
+      .right-drawer-temporary.peeking > #rightDrawer:not(.iron-selected), {
         visibility: visible;
       }
 
+      /* REVIEW: Really? */
       .narrow-layout > #main {
         padding: 0;
-      }
-
-      /* REVIEW: Not sure why this is needed, calculated in _computeMainStyle() - Consider removing*/
-      .right-drawer.narrow-layout > #main {
-        left: 0;
-        right: 0;
       }
 
       .narrow-layout > #main:not(.iron-selected) > #scrim,
@@ -268,14 +275,26 @@ Custom property | Description | Default
         opacity: var(--paper-drawer-panel-scrim-opacity, 1);
       }
 
-      .narrow-layout > #main > * {
+      .narrow-layout > #main > * ,
+      .left-drawer-temporary > #main > *,
+      .right-drawer-temporary > #main > * {
         margin: 0;
-        min-height: 100%;
-        left: 0;
-        right: 0;
-
+        min-height: 100%; /* REVIEW: Not sure about why this is here */
         -moz-box-sizing: border-box;
         box-sizing: border-box;
+      }
+
+      .narrow-layout > #main > * {
+        left: 0;
+        right: 0;
+      }
+
+      .left-drawer-temporary > #main > * {
+        left: 0;
+      }
+
+      .right-drawer-temporary > #main > * {
+        right: 0;
       }
 
       iron-selector:not(.narrow-layout) #main ::content [paper-drawer-toggle] {
@@ -284,18 +303,31 @@ Custom property | Description | Default
     </style>
 
     <iron-media-query
-        id="mq"
+        id="mqResponsiveWidth"
         on-query-matches-changed="_onQueryMatchesChanged"
         query="[[_computeMediaQuery(forceNarrow, responsiveWidth)]]">
     </iron-media-query>
 
+    <iron-media-query
+        id="mqResponsiveWidthLeft"
+        on-query-matches-changed="_onQueryMatchesChanged"
+        query="[[_computeMediaQuery(forceLeftDrawerTemporary, responsiveWidthLeft)]]">
+    </iron-media-query>
+
+    <iron-media-query
+        id="mqResponsiveWidthRight"
+        on-query-matches-changed="_onQueryMatchesChanged"
+        query="[[_computeMediaQuery(forceRightDrawerTemporary, responsiveWidthRight)]]">
+    </iron-media-query>
+
+    <!-- REVIEW: Check that last two class params are correct (camel or dashed??) -->
     <iron-selector
         attr-for-selected="id"
-        class$="[[_computeIronSelectorClass(narrow, _transition, dragging, peeking)]]"
+        class$="[[_computeIronSelectorClass(narrow, _transition, _leftDrawer, _rightDrawer, dragging, peeking, leftDrawerTemporary, rightDrawerTemporary)]]"
         activate-event=""
         selected="[[selected]]">
 
-      <div id="main" style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, drawerWidth)]]" on-transitionend="_onMainTransitionEnd">
+      <div id="main" style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, leftDrawerTemporary, rightDrawerTemporary, drawerWidth)]]" on-transitionend="_onMainTransitionEnd">
         <content select="[main]"></content>
         <div id="scrim" on-tap="closeDrawer"></div>
       </div>
@@ -441,6 +473,25 @@ Custom property | Description | Default
           },
 
           /**
+           * If true, the left drawer will be stacked on top of the main panel
+           */
+          forceLeftDrawerTemporary: {
+            type: Boolean,
+            value: false,
+            observer: '_forceLeftDrawerTemporaryChanged'
+          },
+
+          /**
+           * If true, the right drawer will be stacked on top of the main panel
+           * @type {Object}
+           */
+          forceRightDrawerTemporary: {
+            type: Boolean,
+            value: false,
+            observer: '_forceRightDrawerTemporaryChanged'
+          },
+
+          /**
            * Whether the browser has support for the transform CSS property.
            */
           hasTransform: {
@@ -473,6 +524,30 @@ Custom property | Description | Default
           },
 
           /**
+           * Returns true if the left drawer is temporary.  This is useful if you
+           * need to show/hide elements based on the layout.
+           */
+          leftDrawerTemporary: {
+            reflectToAttribute: true,
+            type: Boolean,
+            value: false,
+            readOnly: true,
+            notify: true
+          },
+
+          /**
+           * Returns true if the right drawer is temporary.  This is useful if you
+           * need to show/hide elements based on the layout.
+           */
+          rightDrawerTemporary: {
+            reflectToAttribute: true,
+            type: Boolean,
+            value: false,
+            readOnly: true,
+            notify: true
+          },
+
+          /**
            * Whether the drawer is peeking out from the edge.
            */
           peeking: {
@@ -488,6 +563,22 @@ Custom property | Description | Default
           responsiveWidth: {
             type: String,
             value: '600px'
+          },
+
+          /**
+           * Max-width when the left drawer is made temporary
+           */
+          responsiveWidthLeft: {
+            type: String,
+            value: null
+          },
+
+          /**
+           * Max-width when the right drawer is made temporary
+           */
+          responsiveWidthRight: {
+            type: String,
+            value: null
           },
 
           /**
@@ -588,10 +679,7 @@ Custom property | Description | Default
           this._transition = true;
 
           // Check to see if drawers exist
-
-          console.log(!!Polymer.dom(this.$.leftDrawerContent).getDistributedNodes().length);
-          console.log(!!Polymer.dom(this.$.rightDrawerContent).getDistributedNodes().length);
-
+          this._set_leftDrawer(!!Polymer.dom(this.$.leftDrawerContent).getDistributedNodes().length);
           this._set_rightDrawer(!!Polymer.dom(this.$.rightDrawerContent).getDistributedNodes().length);
         },
 
@@ -601,32 +689,34 @@ Custom property | Description | Default
           }
         },
 
-        _computeIronSelectorClass: function(narrow, transition, dragging, peeking) {
+        _computeIronSelectorClass: function(narrow, transition, leftDrawer, rightDrawer, dragging, peeking, leftDrawerTemporary, rightDrawerTemporary) {
           return classNames({
             dragging: dragging,
             'narrow-layout': narrow,
-            'right-drawer': true, // TODO: Figure out a way to check for drawers
-            'left-drawer': true,
+            'left-drawer': leftDrawer,
+            'right-drawer': rightDrawer,
             transition: transition,
-            peeking: peeking
+            peeking: peeking,
+            'left-drawer-temporary': leftDrawerTemporary,
+            'right-drawer-temporary': rightDrawerTemporary
           });
         },
 
-        _computeDrawerStyle: function(drawerWidth, widthBySide) {
-          return 'width:' + ((widthBySide) ? widthBySide : drawerWidth) + ';';
+        _computeDrawerStyle: function(drawerWidth, drawerWidthBySide) {
+          return 'width:' + ((drawerWidthBySide) ? drawerWidthBySide : drawerWidth) + ';';
         },
 
-        _computeMainStyle: function(narrow, leftDrawer, rightDrawer, drawerWidth) {
+        _computeMainStyle: function(narrow, leftDrawer, rightDrawer, forceLeftDrawerTemporary, forceRightDrawerTemporary, drawerWidth) {
           var style = '';
 
-          style += 'left:' + ((narrow || !leftDrawer) ? '0' : drawerWidth) + ';';
-          style += 'right:' + ((narrow || !rightDrawer) ? '0' : drawerWidth) + ';';
+          style += 'left:' + ((narrow || forceLeftDrawerTemporary || !leftDrawer) ? '0' : drawerWidth) + ';';
+          style += 'right:' + ((narrow || forceRightDrawerTemporary || !rightDrawer) ? '0' : drawerWidth) + ';';
 
           return style;
         },
 
-        _computeMediaQuery: function(forceNarrow, responsiveWidth) {
-          return forceNarrow ? '' : '(max-width: ' + responsiveWidth + ')';
+        _computeMediaQuery: function(forceNarrow, queryWidth) {
+          return forceNarrow ? '' : '(max-width: ' + queryWidth + ')';
         },
 
         _computeSwipeOverlayHidden: function(narrow, disableEdgeSwipe) {
@@ -651,24 +741,69 @@ Custom property | Description | Default
 
         },
 
-        _responsiveChange: function(narrow) {
-          this._setNarrow(narrow);
+        _responsiveChange: function(value, source) {
+          switch (source) {
+            case 'narrow':
+              this._setNarrow(value);
 
-          if (this.narrow) {
-            this.selected = this.defaultSelected;
+              if (this.narrow) {
+                this.selected = this.defaultSelected;
+              }
+
+              this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
+              this.fire('paper-responsive-change', {narrow: this.narrow});
+              break;
+
+            case 'leftDrawerTemporary':
+              this._setLeftDrawerTemporary(value);
+
+              this.fire('paper-responsive-change', {leftDrawerTemporary: this.leftDrawerTemporary});
+              break;
+
+            case 'rightDrawerTemporary':
+              this._setRightDrawerTemporary(value);
+
+              this.fire('paper-responsive-change', {rightDrawerTemporary: this.rightDrawerTemporary});
+              break;
+
+            default:
+            break;
+
           }
-
-          this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
-          this.fire('paper-responsive-change', {narrow: this.narrow});
         },
 
         _onQueryMatchesChanged: function(event) {
-          this._responsiveChange(event.detail.value);
+          switch (event.srcElement.id) {
+            case 'mqResponsiveWidth':
+              this._responsiveChange(event.detail.value, 'narrow');
+              break;
+
+            case 'mqResponsiveWidthLeft':
+              this._responsiveChange(event.detail.value, 'leftDrawerTemporary');
+              break;
+
+            case 'mqResponsiveWidthRight':
+              this._responsiveChange(event.detail.value, 'rightDrawerTemporary');
+              break;
+
+            default:
+              break;
+          }
         },
 
         _forceNarrowChanged: function() {
           // set the narrow mode only if we reached the `responsiveWidth`
-          this._responsiveChange(this.forceNarrow || this.$.mq.queryMatches);
+          this._responsiveChange(this.forceNarrow || this.$.mqResponsiveWidth.queryMatches, 'narrow');
+        },
+
+        _forceLeftDrawerTemporaryChanged: function() {
+          // set the left drawer temporary only if we reached the `responsiveWidth`
+          this._responsiveChange(this.forceLeftDrawerTemporary || this.$.mqResponsiveWidthLeft.queryMatches, 'leftDrawerTemporary');
+        },
+
+        _forceRightDrawerTemporaryChanged: function() {
+          // set the right drawer temporary only if we reached the `responsiveWidth`
+          this._responsiveChange(this.forceRightDrawerTemporary || this.$.mqResponsiveWidthRight.queryMatches, 'rightDrawerTemporary');
         },
 
         _swipeAllowed: function() {
