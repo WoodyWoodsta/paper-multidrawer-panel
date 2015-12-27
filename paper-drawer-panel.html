@@ -141,7 +141,7 @@ Custom property | Description | Default
         overflow: hidden;
       }
 
-      iron-selector > #drawer {
+      iron-selector > .drawer {
         position: absolute;
         top: 0;
         left: 0;
@@ -154,16 +154,17 @@ Custom property | Description | Default
         @apply(--paper-drawer-panel-drawer-container);
       }
 
-      .transition > #drawer {
+      .transition > .drawer {
         transition: -webkit-transform ease-in-out 0.3s, width ease-in-out 0.3s, visibility 0.3s;
         transition: transform ease-in-out 0.3s, width ease-in-out 0.3s, visibility 0.3s;
       }
 
-      .left-drawer > #drawer {
+      /* REVIEW: Consider restructuring the way iron-selector holds classes for content */
+      .left-drawer > #leftDrawer {
         @apply(--paper-drawer-panel-left-drawer-container);
       }
 
-      .right-drawer > #drawer {
+      .right-drawer > #rightDrawer {
         left: auto;
         right: 0;
 
@@ -180,22 +181,24 @@ Custom property | Description | Default
       }
 
       .transition > #main {
-        transition: left ease-in-out 0.3s, padding ease-in-out 0.3s;
+        transition: left ease-in-out 0.3s, right ease-in-out 0.3s, padding ease-in-out 0.3s;
       }
 
-      .right-drawer > #main {
+      /*.right-drawer > #main {
         left: 0;
-      }
+      }*/
 
-      .right-drawer.transition > #main {
-        transition: right ease-in-out 0.3s, padding ease-in-out 0.3s;
+      /* NOTE: This is not needed, calculated by _computeMainStyle() */
+      .left-drawer > #main {
+        left: auto;
       }
 
       #main > ::content > [main] {
         height: 100%;
       }
 
-      #drawer > ::content > [drawer] {
+      .drawer > ::content > [left-drawer],
+      .drawer > ::content > [right-drawer] {
         height: 100%;
       }
 
@@ -213,28 +216,29 @@ Custom property | Description | Default
         @apply(--paper-drawer-panel-scrim);
       }
 
-      .narrow-layout > #drawer {
+      .narrow-layout > .drawer {
         will-change: transform;
       }
 
-      .narrow-layout > #drawer.iron-selected {
+      .narrow-layout > #leftDrawer.iron-selected {
         box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
-      .right-drawer.narrow-layout > #drawer.iron-selected {
+      .narrow-layout > #rightDrawer.iron-selected {
         box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
-      .narrow-layout > #drawer > ::content > [drawer] {
+      .narrow-layout > .drawer > ::content > [left-drawer],
+      .narrow-layout > .drawer > ::content > [right-drawer] {
         border: 0;
       }
 
-      .left-drawer.narrow-layout > #drawer:not(.iron-selected) {
+      .narrow-layout > #leftDrawer:not(.iron-selected) {
         -webkit-transform: translateX(-100%);
         transform: translateX(-100%);
       }
 
-      .right-drawer.narrow-layout > #drawer:not(.iron-selected) {
+      .narrow-layout > #rightDrawer:not(.iron-selected) {
         left: auto;
         visibility: hidden;
 
@@ -242,8 +246,8 @@ Custom property | Description | Default
         transform: translateX(100%);
       }
 
-      .right-drawer.narrow-layout.dragging > #drawer:not(.iron-selected),
-      .right-drawer.narrow-layout.peeking > #drawer:not(.iron-selected) {
+      .narrow-layout.dragging > .drawer:not(.iron-selected),
+      .narrow-layout.peeking > .drawer:not(.iron-selected) {
         visibility: visible;
       }
 
@@ -251,6 +255,7 @@ Custom property | Description | Default
         padding: 0;
       }
 
+      /* REVIEW: Not sure why this is needed, calculated in _computeMainStyle() - Consider removing*/
       .right-drawer.narrow-layout > #main {
         left: 0;
         right: 0;
@@ -286,7 +291,7 @@ Custom property | Description | Default
 
     <iron-selector
         attr-for-selected="id"
-        class$="[[_computeIronSelectorClass(narrow, _transition, dragging, rightDrawer, peeking)]]"
+        class$="[[_computeIronSelectorClass(narrow, _transition, dragging, peeking)]]"
         activate-event=""
         selected="[[selected]]">
 
@@ -295,11 +300,11 @@ Custom property | Description | Default
         <div id="scrim" on-tap="closeDrawer"></div>
       </div>
 
-      <div id="leftDrawer" style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
+      <div id="leftDrawer" class="drawer" style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
         <content select="[left-drawer]"></content>
       </div>
 
-      <div id="rightDrawer" style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
+      <div id="rightDrawer" class="drawer" style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
         <content select="[right-drawer]"></content>
       </div>
 
@@ -577,12 +582,12 @@ Custom property | Description | Default
           }
         },
 
-        _computeIronSelectorClass: function(narrow, transition, dragging, rightDrawer, peeking) {
+        _computeIronSelectorClass: function(narrow, transition, dragging, peeking) {
           return classNames({
             dragging: dragging,
             'narrow-layout': narrow,
-            'right-drawer': rightDrawer,
-            'left-drawer': !rightDrawer,
+            'right-drawer': true, // TODO: Figure out a way to check for drawers
+            'left-drawer': true,
             transition: transition,
             peeking: peeking
           });
