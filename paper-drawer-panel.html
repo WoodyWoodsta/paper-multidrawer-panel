@@ -1,4 +1,4 @@
-<!--
+`<!--
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
@@ -295,17 +295,17 @@ Custom property | Description | Default
         activate-event=""
         selected="[[selected]]">
 
-      <div id="main" style$="[[_computeMainStyle(narrow, rightDrawer, drawerWidth)]]" on-transitionend="_onMainTransitionEnd">
+      <div id="main" style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, drawerWidth)]]" on-transitionend="_onMainTransitionEnd">
         <content select="[main]"></content>
         <div id="scrim" on-tap="closeDrawer"></div>
       </div>
 
-      <div id="leftDrawer" class="drawer" style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
-        <content select="[left-drawer]"></content>
+      <div id="leftDrawer" class="drawer" hidden$="[[!_leftDrawer]]" style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
+        <content id="leftDrawerContent" select="[left-drawer]"></content>
       </div>
 
-      <div id="rightDrawer" class="drawer" style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
-        <content select="[right-drawer]"></content>
+      <div id="rightDrawer" class="drawer" hidden$="[[!_rightDrawer]]" style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
+        <content id="rightDrawerContent" select="[right-drawer]"></content>
       </div>
 
     </iron-selector>
@@ -491,14 +491,6 @@ Custom property | Description | Default
           },
 
           /**
-           * If true, position the drawer to the right.
-           */
-          rightDrawer: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
            * The panel that is being selected. `drawer` for the drawer panel and
            * `main` for the main panel.
            */
@@ -524,6 +516,26 @@ Custom property | Description | Default
           _transition: {
             type: Boolean,
             value: false
+          },
+
+          /**
+           * If true, there exists a left drawer.
+           */
+          _leftDrawer: {
+            type: Boolean,
+            value: true,
+            readOnly: true,
+            notify: true
+          },
+
+          /**
+           * If true, there exists a right drawer.
+           */
+          _rightDrawer: {
+            type: Boolean,
+            value: true,
+            readOnly: true,
+            notify: true
           },
 
         },
@@ -574,6 +586,13 @@ Custom property | Description | Default
           // Avoid transition at the beginning e.g. page loads and enable
           // transitions only after the element is rendered and ready.
           this._transition = true;
+
+          // Check to see if drawers exist
+
+          console.log(!!Polymer.dom(this.$.leftDrawerContent).getDistributedNodes().length);
+          console.log(!!Polymer.dom(this.$.rightDrawerContent).getDistributedNodes().length);
+
+          this._set_rightDrawer(!!Polymer.dom(this.$.rightDrawerContent).getDistributedNodes().length);
         },
 
         _onMainTransitionEnd: function (e) {
@@ -597,14 +616,11 @@ Custom property | Description | Default
           return 'width:' + ((widthBySide) ? widthBySide : drawerWidth) + ';';
         },
 
-        _computeMainStyle: function(narrow, rightDrawer, drawerWidth) {
+        _computeMainStyle: function(narrow, leftDrawer, rightDrawer, drawerWidth) {
           var style = '';
 
-          style += 'left:' + ((narrow || rightDrawer) ? '0' : drawerWidth) + ';';
-
-          if (rightDrawer) {
-            style += 'right:' + (narrow ? '' : drawerWidth) + ';';
-          }
+          style += 'left:' + ((narrow || !leftDrawer) ? '0' : drawerWidth) + ';';
+          style += 'right:' + ((narrow || !rightDrawer) ? '0' : drawerWidth) + ';';
 
           return style;
         },
