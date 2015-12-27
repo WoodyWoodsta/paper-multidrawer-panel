@@ -295,8 +295,12 @@ Custom property | Description | Default
         <div id="scrim" on-tap="closeDrawer"></div>
       </div>
 
-      <div id="drawer" style$="[[_computeDrawerStyle(drawerWidth)]]">
-        <content select="[drawer]"></content>
+      <div id="leftDrawer" style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
+        <content select="[left-drawer]"></content>
+      </div>
+
+      <div id="rightDrawer" style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
+        <content select="[right-drawer]"></content>
       </div>
 
     </iron-selector>
@@ -396,6 +400,22 @@ Custom property | Description | Default
           drawerWidth: {
             type: String,
             value: '256px'
+          },
+
+          /**
+           * Width of the left drawer panel, if specified
+           */
+          leftDrawerWidth: {
+            type: String,
+            value: null
+          },
+
+          /**
+           * Width of the right drawer panel, if specified
+           */
+          rightDrawerWidth: {
+            type: String,
+            value: null
           },
 
           /**
@@ -568,8 +588,8 @@ Custom property | Description | Default
           });
         },
 
-        _computeDrawerStyle: function(drawerWidth) {
-          return 'width:' + drawerWidth + ';';
+        _computeDrawerStyle: function(drawerWidth, widthBySide) {
+          return 'width:' + ((widthBySide) ? widthBySide : drawerWidth) + ';';
         },
 
         _computeMainStyle: function(narrow, rightDrawer, drawerWidth) {
