@@ -320,23 +320,28 @@ Custom property | Description | Default
         query="[[_computeMediaQuery(forceRightDrawerTemporary, responsiveWidthRight)]]">
     </iron-media-query>
 
-    <!-- REVIEW: Check that last two class params are correct (camel or dashed??) -->
     <iron-selector
         attr-for-selected="id"
         class$="[[_computeIronSelectorClass(narrow, _transition, _leftDrawer, _rightDrawer, dragging, peeking, leftDrawerTemporary, rightDrawerTemporary)]]"
         activate-event=""
         selected="[[selected]]">
 
-      <div id="main" style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, leftDrawerTemporary, rightDrawerTemporary, drawerWidth)]]" on-transitionend="_onMainTransitionEnd">
+      <div id="main"
+          style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, leftDrawerTemporary, rightDrawerTemporary, drawerWidth)]]"
+          on-transitionend="_onMainTransitionEnd">
         <content select="[main]"></content>
         <div id="scrim" on-tap="closeDrawer"></div>
       </div>
 
-      <div id="leftDrawer" class="drawer" hidden$="[[!_leftDrawer]]" style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
+      <div id="leftDrawer" class="drawer"
+          hidden$="[[!_leftDrawer]]"
+          style$="[[_computeDrawerStyle(drawerWidth, leftDrawerWidth)]]">
         <content id="leftDrawerContent" select="[left-drawer]"></content>
       </div>
 
-      <div id="rightDrawer" class="drawer" hidden$="[[!_rightDrawer]]" style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
+      <div id="rightDrawer" class="drawer"
+          hidden$="[[!_rightDrawer]]"
+          style$="[[_computeDrawerStyle(drawerWidth, rightDrawerWidth)]]">
         <content id="rightDrawerContent" select="[right-drawer]"></content>
       </div>
 
@@ -602,6 +607,24 @@ Custom property | Description | Default
           },
 
           /**
+           * The attribute on elements that should toggle the left drawer on tap, also elements will
+           * automatically be hidden in wide layout, or if the particular drawer is permanent.
+           */
+          leftDrawerToggleAttribute: {
+            type: String,
+            value: 'paper-drawer-toggle-left'
+          },
+
+          /**
+           * The attribute on elements that should toggle the right drawer on tap, also elements will
+           * automatically be hidden in wide layout, or if the particular drawer is permanent.
+           */
+          rightDrawerToggleAttribute: {
+            type: String,
+            value: 'paper-drawer-toggle-right'
+          },
+
+          /**
            * Whether the transition is enabled.
            */
           _transition: {
@@ -614,7 +637,7 @@ Custom property | Description | Default
            */
           _leftDrawer: {
             type: Boolean,
-            value: true,
+            value: false,
             readOnly: true,
             notify: true
           },
@@ -624,7 +647,7 @@ Custom property | Description | Default
            */
           _rightDrawer: {
             type: Boolean,
-            value: true,
+            value: false,
             readOnly: true,
             notify: true
           },
@@ -656,12 +679,62 @@ Custom property | Description | Default
         },
 
         /**
+         * Toggles the left panel open and closed.
+         *
+         * @method togglePanel
+         */
+        toggleLeftPanel: function() {
+          if (this._isMainSelected()) {
+            this.openLeftDrawer();
+          } else {
+            this.closeLeftDrawer();
+          }
+        },
+
+        /**
+         * Toggles the right panel open and closed.
+         *
+         * @method togglePanel
+         */
+        toggleRightPanel: function() {
+          if (this._isMainSelected()) {
+            this.openRightDrawer();
+          } else {
+            this.closeRightDrawer();
+          }
+        },
+
+        /**
          * Opens the drawer.
          *
          * @method openDrawer
          */
+        // REVIEW: Consider adding a check for the drawer,
+        // since it is not necesarily required (or is it?)
         openDrawer: function() {
           this.selected = 'drawer';
+        },
+
+        /**
+         * Opens the left drawer if it exists.
+         *
+         * @method openDrawer
+         */
+        openLeftDrawer: function() {
+          if (this._leftDrawer) {
+            this.selected = 'leftDrawer';
+          }
+        },
+
+        /**
+         * Opens the right drawer if it exists.
+         *
+         * @method openDrawer
+         */
+        openRightDrawer: function() {
+          if (this._rightDrawer) {
+            this.selected = 'rightDrawer';
+          }
         },
 
         /**
@@ -670,6 +743,24 @@ Custom property | Description | Default
          * @method closeDrawer
          */
         closeDrawer: function() {
+          this.selected = 'main';
+        },
+
+        /**
+         * Closes the left drawer
+         *
+         * @method closeDrawer
+         */
+        closeLeftDrawer: function() {
+          this.selected = 'main';
+        },
+
+        /**
+         * Closes the right drawer
+         *
+         * @method closeDrawer
+         */
+        closeRightDrawer: function() {
           this.selected = 'main';
         },
 
@@ -741,6 +832,7 @@ Custom property | Description | Default
 
         },
 
+        // REVIEW: Consider making the switch statement separate function calls
         _responsiveChange: function(value, source) {
           switch (source) {
             case 'narrow':
@@ -757,11 +849,19 @@ Custom property | Description | Default
             case 'leftDrawerTemporary':
               this._setLeftDrawerTemporary(value);
 
+              if (this.leftDrawerTemporary) {
+                this.selected = this.defaultSelected;
+              }
+
               this.fire('paper-responsive-change', {leftDrawerTemporary: this.leftDrawerTemporary});
               break;
 
             case 'rightDrawerTemporary':
               this._setRightDrawerTemporary(value);
+
+              if (this.rightDrawerTemporary) {
+                this.selected = this.defaultSelected;
+              }
 
               this.fire('paper-responsive-change', {rightDrawerTemporary: this.rightDrawerTemporary});
               break;
