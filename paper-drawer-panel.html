@@ -756,6 +756,7 @@ Custom property | Description | Default
         openLeftDrawer: function() {
           if (this._leftDrawer) {
             this.selected = 'leftDrawer';
+            this._clickedDrawer = this.$.leftDrawer;
           }
         },
 
@@ -767,6 +768,7 @@ Custom property | Description | Default
         openRightDrawer: function() {
           if (this._rightDrawer) {
             this.selected = 'rightDrawer';
+            this._clickedDrawer = this.$.rightDrawer;
           }
         },
 
@@ -777,6 +779,7 @@ Custom property | Description | Default
          */
         closeDrawer: function() {
           this.selected = 'main';
+          this._clickedDrawer = null;
         },
 
         /**
@@ -786,6 +789,7 @@ Custom property | Description | Default
          */
         closeLeftDrawer: function() {
           this.selected = 'main';
+          this._clickedDrawer = null;
         },
 
         /**
@@ -802,9 +806,12 @@ Custom property | Description | Default
           // transitions only after the element is rendered and ready.
           this._transition = true;
 
-          // Check to see if drawers exist
+          // Check to see if drawers exist & recompute mq
           this._set_leftDrawer(!!Polymer.dom(this.$.leftDrawerContent).getDistributedNodes().length);
+          this._responsiveChange(this.$.mqResponsiveWidthLeft.queryMatches, 'leftDrawerTemporary');
+
           this._set_rightDrawer(!!Polymer.dom(this.$.rightDrawerContent).getDistributedNodes().length);
+          this._responsiveChange(this.$.mqResponsiveWidthRight.queryMatches, 'rightDrawerTemporary');
         },
 
         _onMainTransitionEnd: function (e) {
@@ -821,8 +828,8 @@ Custom property | Description | Default
             'right-drawer': rightDrawer,
             transition: transition,
             peeking: peeking,
-            'left-drawer-temporary': leftDrawerTemporary || narrow,
-            'right-drawer-temporary': rightDrawerTemporary || narrow
+            'left-drawer-temporary': leftDrawerTemporary || (narrow && leftDrawer),
+            'right-drawer-temporary': rightDrawerTemporary || (narrow && rightDrawer)
           });
         },
 
@@ -884,33 +891,37 @@ Custom property | Description | Default
               break;
 
             case 'leftDrawerTemporary':
-              if (this.narrow) {
-                this._setLeftDrawerTemporary(true);
-              } else {
-                this._setLeftDrawerTemporary(value);
-              }
+              if (this._leftDrawer) {
+                if (this.narrow) {
+                  this._setLeftDrawerTemporary(true);
+                } else {
+                  this._setLeftDrawerTemporary(value);
+                }
 
-              if (this.leftDrawerTemporary) {
-                this.selected = this.defaultSelected;
-              }
+                if (this.leftDrawerTemporary) {
+                  this.selected = this.defaultSelected;
+                }
 
-              this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
-              this.fire('paper-responsive-change', {leftDrawerTemporary: this.leftDrawerTemporary});
+                this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
+                this.fire('paper-responsive-change', {leftDrawerTemporary: this.leftDrawerTemporary});
+              }
               break;
 
             case 'rightDrawerTemporary':
-              if (this.narrow) {
-                this._setRightDrawerTemporary(true);
-              } else {
-                this._setRightDrawerTemporary(value);
-              }
+              if (this._rightDrawer) {
+                if (this.narrow) {
+                  this._setRightDrawerTemporary(true);
+                } else {
+                  this._setRightDrawerTemporary(value);
+                }
 
-              if (this.rightDrawerTemporary) {
-                this.selected = this.defaultSelected;
-              }
+                if (this.rightDrawerTemporary) {
+                  this.selected = this.defaultSelected;
+                }
 
-              this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
-              this.fire('paper-responsive-change', {rightDrawerTemporary: this.rightDrawerTemporary});
+                this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
+                this.fire('paper-responsive-change', {rightDrawerTemporary: this.rightDrawerTemporary});
+              }
               break;
 
             default:
@@ -1003,9 +1014,8 @@ Custom property | Description | Default
 
         _upHandler: function() {
           this._stopEdgePeek();
-          // release the panel and drawer
+          // release the panel
           sharedPanel = null;
-          this._clickedDrawer = null;
         },
 
         _onTap: function(event) {
@@ -1055,16 +1065,32 @@ Custom property | Description | Default
         },
 
         _trackStart: function(event) {
+          var edge;
+
           if (this._swipeAllowed()) {
             sharedPanel = this;
             this._setDragging(true);
 
             if (this._isMainSelected()) {
-              this._setDragging(this.peeking || this._isEdgeTouch(event));
+              edge = this._isEdgeTouch(event);
+              this._setDragging(this.peeking || !!edge);
             }
 
             if (this.dragging) {
-              this.width = this.$.drawer.offsetWidth;
+              if (!this._clickedDrawer) {
+                switch (edge) {
+                  case 'left':
+                    this._clickedDrawer = this.$.leftDrawer;
+                    break;
+                  case 'right':
+                    this._clickedDrawer = this.$.rightDrawer;
+                    break;
+                  default:
+                    return;
+                }
+              }
+
+              this.width = this._clickedDrawer.offsetWidth;
               this._transition = false;
             }
           }
@@ -1092,7 +1118,7 @@ Custom property | Description | Default
               this._setPeeking(false);
             }
 
-            this._moveDrawer(this._translateXForDeltaX(dx));
+            this._moveDrawer(this._clickedDrawer, this._translateXForDeltaX(dx));
           }
         },
 
@@ -1103,12 +1129,22 @@ Custom property | Description | Default
             this._setDragging(false);
             this._transition = true;
             sharedPanel = null;
-            this._moveDrawer(null);
+            this._moveDrawer(this._clickedDrawer, null);
 
-            if (this.rightDrawer) {
-              this[xDirection ? 'closeDrawer' : 'openDrawer']();
+            if (this._clickedDrawer.id === 'rightDrawer') {
+              if (xDirection) {
+                this.closeRightDrawer();
+                this._clickedDrawer = null;
+              } else {
+                this.openRightDrawer();
+              }
             } else {
-              this[xDirection ? 'openDrawer' : 'closeDrawer']();
+              if (!xDirection) {
+                this.closeLeftDrawer();
+                this._clickedDrawer = null;
+              } else {
+                this.openLeftDrawer();
+              }
             }
           }
         },
