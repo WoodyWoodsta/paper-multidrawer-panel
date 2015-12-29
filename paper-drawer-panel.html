@@ -260,12 +260,14 @@ Custom property | Description | Default
         transform: translateX(100%);
       }
 
-      .narrow-layout.dragging > .drawer:not(.iron-selected),
-      .narrow-layout.peeking > .drawer:not(.iron-selected),
+      /*.narrow-layout.dragging > .drawer:not(.iron-selected),*/
+      /*.narrow-layout.peeking > .drawer:not(.iron-selected),*/
+      /* Above selectors for legacy */
+
       .left-drawer-temporary.dragging > #leftDrawer:not(.iron-selected),
       .left-drawer-temporary.peeking > #leftDrawer:not(.iron-selected),
       .right-drawer-temporary.dragging > #rightDrawer:not(.iron-selected),
-      .right-drawer-temporary.peeking > #rightDrawer:not(.iron-selected), {
+      .right-drawer-temporary.peeking > #rightDrawer:not(.iron-selected) {
         visibility: visible;
       }
 
@@ -277,8 +279,8 @@ Custom property | Description | Default
       .narrow-layout > #main:not(.iron-selected) > #scrim,
       .left-drawer-temporary > #leftDrawer.iron-selected ~ #main > #scrim,
       .right-drawer-temporary > #rightDrawer.iron-selected ~ #main > #scrim,
-      .dragging > #main > #scrim,
-      .peeking > #main > #scrim {
+      .peeking > #main > #scrim,
+      .dragging > #main > #scrim {
         visibility: visible;
         opacity: var(--paper-drawer-panel-scrim-opacity, 1);
       }
@@ -437,7 +439,7 @@ Custom property | Description | Default
           },
 
           /**
-           * Whether the user is dragging the drawer interactively.
+           * Whether the user is dragging a drawer interactively.
            */
           dragging: {
             type: Boolean,
@@ -566,6 +568,27 @@ Custom property | Description | Default
            * Whether the drawer is peeking out from the edge.
            */
           peeking: {
+            type: Boolean,
+            value: false,
+            readOnly: true,
+            notify: true
+          },
+
+          /**
+           * Whether the drawer is peeking out from the edge.
+           */
+          // REVIEW: Do we need these?
+          leftPeeking: {
+            type: Boolean,
+            value: false,
+            readOnly: true,
+            notify: true
+          },
+
+          /**
+           * Whether the drawer is peeking out from the edge.
+           */
+          rightPeeking: {
             type: Boolean,
             value: false,
             readOnly: true,
@@ -931,30 +954,46 @@ Custom property | Description | Default
         },
 
         _swipeAllowed: function() {
-          return this.narrow && !this.disableSwipe;
+          return (this.narrow || this.leftDrawerTemporary || this.rightDrawerTemporary) && !this.disableSwipe;
         },
 
         _isMainSelected: function() {
           return this.selected === 'main';
         },
 
-        _startEdgePeek: function() {
-          this.width = this.$.drawer.offsetWidth;
-          this._moveDrawer(this._translateXForDeltaX(this.rightDrawer ?
-              -this.edgeSwipeSensitivity : this.edgeSwipeSensitivity));
-          this._setPeeking(true);
+        _startEdgePeek: function(edge) {
+          var x;
+
+          switch (edge) {
+            case 'left':
+              this._clickedDrawer = this.$.leftDrawer;
+              x = this.edgeSwipeSensitivity;
+              break;
+            case 'right':
+              this._clickedDrawer = this.$.rightDrawer;
+              x = -this.edgeSwipeSensitivity;
+              break;
+            default:
+            return;
+          }
+
+          this.width = this._clickedDrawer.offsetWidth;
+          this._moveDrawer(this._clickedDrawer, this._translateXForDeltaX(x));
+          this._setPeeking(true); // TODO: Set other peeking properties
         },
 
         _stopEdgePeek: function() {
           if (this.peeking) {
             this._setPeeking(false);
-            this._moveDrawer(null);
+            this._moveDrawer(this._clickedDrawer, null);
           }
         },
 
         _downHandler: function(event) {
-          if (!this.dragging && this._isMainSelected() && this._isEdgeTouch(event) && !sharedPanel) {
-            this._startEdgePeek();
+          var edge = this._isEdgeTouch(event);
+
+          if (!this.dragging && this._isMainSelected() && !!edge && !sharedPanel) {
+            this._startEdgePeek(edge);
             // cancel selection
             event.preventDefault();
             // grab this panel
@@ -964,8 +1003,9 @@ Custom property | Description | Default
 
         _upHandler: function() {
           this._stopEdgePeek();
-          // release the panel
+          // release the panel and drawer
           sharedPanel = null;
+          this._clickedDrawer = null;
         },
 
         _onTap: function(event) {
@@ -1002,10 +1042,16 @@ Custom property | Description | Default
         _isEdgeTouch: function(event) {
           var x = event.detail.x;
 
-          return !this.disableEdgeSwipe && this._swipeAllowed() &&
-            (this.rightDrawer ?
-              x >= this.offsetWidth - this.edgeSwipeSensitivity :
-              x <= this.edgeSwipeSensitivity);
+          if (!this.disableEdgeSwipe && this._swipeAllowed()) {
+            // decide which side is being touched
+            if ((x <= this.edgeSwipeSensitivity) && this.leftDrawerTemporary) {
+              return 'left';
+            } else if ((x >= this.offsetWidth - this.edgeSwipeSensitivity) && this.rightDrawerTemporary) {
+              return 'right';
+            }
+          }
+
+          return false;
         },
 
         _trackStart: function(event) {
@@ -1027,7 +1073,7 @@ Custom property | Description | Default
         _translateXForDeltaX: function(deltaX) {
           var isMain = this._isMainSelected();
 
-          if (this.rightDrawer) {
+          if (this._clickedDrawer.id === 'rightDrawer') {
             return Math.max(0, isMain ? this.width + deltaX : deltaX);
           } else {
             return Math.min(0, isMain ? deltaX - this.width : deltaX);
@@ -1076,8 +1122,8 @@ Custom property | Description | Default
               'translate3d(' + translateX + 'px, 0, 0)';
         },
 
-        _moveDrawer: function(translateX) {
-          this.transform(this._transformForTranslateX(translateX), this.$.drawer);
+        _moveDrawer: function(drawer, translateX) {
+          this.transform(this._transformForTranslateX(translateX), drawer);
         }
 
       });
