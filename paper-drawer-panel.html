@@ -1,4 +1,4 @@
-`<!--
+<!--
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
@@ -159,7 +159,6 @@ Custom property | Description | Default
         transition: transform ease-in-out 0.3s, width ease-in-out 0.3s, visibility 0.3s;
       }
 
-      /* REVIEW: Consider restructuring the way iron-selector holds classes for content */
       .left-drawer > #leftDrawer {
         z-index: 0;
         @apply(--paper-drawer-panel-left-drawer-container);
@@ -177,6 +176,7 @@ Custom property | Description | Default
         position: absolute;
         top: 0;
         right: 0;
+        left: 0;
         bottom: 0;
 
         @apply(--paper-drawer-panel-main-container);
@@ -185,15 +185,6 @@ Custom property | Description | Default
       .transition > #main {
         transition: left ease-in-out 0.3s, right ease-in-out 0.3s, padding ease-in-out 0.3s;
       }
-
-      /*.right-drawer > #main {
-        left: 0;
-      }*/
-
-      /* NOTE: This is not needed, calculated by _computeMainStyle() */
-      /*.left-drawer > #main {
-        left: auto;
-      }*/
 
       #main > ::content > [main] {
         height: 100%;
@@ -260,10 +251,6 @@ Custom property | Description | Default
         transform: translateX(100%);
       }
 
-      /*.narrow-layout.dragging > .drawer:not(.iron-selected),*/
-      /*.narrow-layout.peeking > .drawer:not(.iron-selected),*/
-      /* Above selectors for legacy */
-
       .left-drawer-temporary.dragging > #leftDrawer:not(.iron-selected),
       .left-drawer-temporary.peeking > #leftDrawer:not(.iron-selected),
       .right-drawer-temporary.dragging > #rightDrawer:not(.iron-selected),
@@ -271,7 +258,6 @@ Custom property | Description | Default
         visibility: visible;
       }
 
-      /* REVIEW: Really? */
       .narrow-layout > #main {
         padding: 0;
       }
@@ -351,7 +337,7 @@ Custom property | Description | Default
       </div>
 
       <div id="main"
-          style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, leftDrawerTemporary, rightDrawerTemporary, drawerWidth)]]"
+          style$="[[_computeMainStyle(narrow, _leftDrawer, _rightDrawer, leftDrawerTemporary, rightDrawerTemporary, drawerWidth, leftDrawerWidth, rightDrawerWidth)]]"
           on-transitionend="_onMainTransitionEnd">
         <content select="[main]"></content>
         <div id="scrim" on-tap="closeDrawer"></div>
@@ -388,8 +374,10 @@ Custom property | Description | Default
         /**
          * Fired when the narrow layout changes.
          *
-         * @event paper-responsive-change {{narrow: boolean}} detail -
+         * @event paper-responsive-change {{item: boolean}} detail -
          *     narrow: true if the panel is in narrow layout.
+         *     leftDrawerTemporary: true if the left drawer is temporary.
+         *     rightDrawerTemporary: true if the right drawer is temporary.
          */
 
         /**
@@ -575,27 +563,6 @@ Custom property | Description | Default
           },
 
           /**
-           * Whether the drawer is peeking out from the edge.
-           */
-          // REVIEW: Do we need these?
-          leftPeeking: {
-            type: Boolean,
-            value: false,
-            readOnly: true,
-            notify: true
-          },
-
-          /**
-           * Whether the drawer is peeking out from the edge.
-           */
-          rightPeeking: {
-            type: Boolean,
-            value: false,
-            readOnly: true,
-            notify: true
-          },
-
-          /**
            * Max-width when the panel changes to narrow layout.
            */
           responsiveWidth: {
@@ -620,8 +587,8 @@ Custom property | Description | Default
           },
 
           /**
-           * The panel that is being selected. `drawer` for the drawer panel and
-           * `main` for the main panel.
+           * The panel that is being selected. `leftDrawer` for the left drawer,
+           * `rightDrawer` for the right drawer and `main` for the main panel
            */
           selected: {
             reflectToAttribute: true,
@@ -685,6 +652,14 @@ Custom property | Description | Default
             notify: true
           },
 
+          /**
+           * The drawer object that can be dragged, closed or is being moved
+           */
+          _movingDrawer: {
+            type: Object,
+            value: null
+          }
+
         },
 
         listeners: {
@@ -738,14 +713,13 @@ Custom property | Description | Default
         },
 
         /**
-         * Opens the drawer.
+         * Opens the left drawer by default and the right drawer if the
+         * left drawer does not exist
          *
          * @method openDrawer
          */
-        // REVIEW: Consider adding a check for the drawer,
-        // since it is not necesarily required (or is it?)
         openDrawer: function() {
-          this.selected = 'drawer';
+          this.selected = this._leftDrawer ? 'leftDrawer' : 'rightDrawer';
         },
 
         /**
@@ -756,7 +730,7 @@ Custom property | Description | Default
         openLeftDrawer: function() {
           if (this._leftDrawer) {
             this.selected = 'leftDrawer';
-            this._clickedDrawer = this.$.leftDrawer;
+            this._movingDrawer = this.$.leftDrawer;
           }
         },
 
@@ -768,7 +742,7 @@ Custom property | Description | Default
         openRightDrawer: function() {
           if (this._rightDrawer) {
             this.selected = 'rightDrawer';
-            this._clickedDrawer = this.$.rightDrawer;
+            this._movingDrawer = this.$.rightDrawer;
           }
         },
 
@@ -779,7 +753,7 @@ Custom property | Description | Default
          */
         closeDrawer: function() {
           this.selected = 'main';
-          this._clickedDrawer = null;
+          this._movingDrawer = null;
         },
 
         /**
@@ -789,7 +763,7 @@ Custom property | Description | Default
          */
         closeLeftDrawer: function() {
           this.selected = 'main';
-          this._clickedDrawer = null;
+          this._movingDrawer = null;
         },
 
         /**
@@ -837,11 +811,20 @@ Custom property | Description | Default
           return 'width:' + ((drawerWidthBySide) ? drawerWidthBySide : drawerWidth) + ';';
         },
 
-        _computeMainStyle: function(narrow, leftDrawer, rightDrawer, forceLeftDrawerTemporary, forceRightDrawerTemporary, drawerWidth) {
+        _computeMainStyle: function(narrow, leftDrawer, rightDrawer, forceLeftDrawerTemporary, forceRightDrawerTemporary, drawerWidth, leftDrawerWidth, rightDrawerWidth) {
           var style = '';
 
-          style += 'left:' + ((narrow || forceLeftDrawerTemporary || !leftDrawer) ? '0' : drawerWidth) + ';';
-          style += 'right:' + ((narrow || forceRightDrawerTemporary || !rightDrawer) ? '0' : drawerWidth) + ';';
+          if (narrow || forceLeftDrawerTemporary || !leftDrawer) {
+            style += 'left:0;';
+          } else {
+            style += 'left:0' + ((leftDrawerWidth) ? leftDrawerWidth : drawerWidth) + ';';
+          }
+
+          if (narrow || forceRightDrawerTemporary || !rightDrawer) {
+            style += 'right:0;';
+          } else {
+            style += 'right:' + ((rightDrawerWidth) ? rightDrawerWidth : drawerWidth) + ';';
+          }
 
           return style;
         },
@@ -876,7 +859,6 @@ Custom property | Description | Default
 
         },
 
-        // REVIEW: Consider making the switch statement separate function calls
         _responsiveChange: function(value, source) {
           switch (source) {
             case 'narrow':
@@ -977,26 +959,26 @@ Custom property | Description | Default
 
           switch (edge) {
             case 'left':
-              this._clickedDrawer = this.$.leftDrawer;
+              this._movingDrawer = this.$.leftDrawer;
               x = this.edgeSwipeSensitivity;
               break;
             case 'right':
-              this._clickedDrawer = this.$.rightDrawer;
+              this._movingDrawer = this.$.rightDrawer;
               x = -this.edgeSwipeSensitivity;
               break;
             default:
             return;
           }
 
-          this.width = this._clickedDrawer.offsetWidth;
-          this._moveDrawer(this._clickedDrawer, this._translateXForDeltaX(x));
-          this._setPeeking(true); // TODO: Set other peeking properties
+          this.width = this._movingDrawer.offsetWidth;
+          this._moveDrawer(this._movingDrawer, this._translateXForDeltaX(x));
+          this._setPeeking(true);
         },
 
         _stopEdgePeek: function() {
           if (this.peeking) {
             this._setPeeking(false);
-            this._moveDrawer(this._clickedDrawer, null);
+            this._moveDrawer(this._movingDrawer, null);
           }
         },
 
@@ -1077,20 +1059,20 @@ Custom property | Description | Default
             }
 
             if (this.dragging) {
-              if (!this._clickedDrawer) {
+              if (!this._movingDrawer) {
                 switch (edge) {
                   case 'left':
-                    this._clickedDrawer = this.$.leftDrawer;
+                    this._movingDrawer = this.$.leftDrawer;
                     break;
                   case 'right':
-                    this._clickedDrawer = this.$.rightDrawer;
+                    this._movingDrawer = this.$.rightDrawer;
                     break;
                   default:
                     return;
                 }
               }
 
-              this.width = this._clickedDrawer.offsetWidth;
+              this.width = this._movingDrawer.offsetWidth;
               this._transition = false;
             }
           }
@@ -1099,7 +1081,7 @@ Custom property | Description | Default
         _translateXForDeltaX: function(deltaX) {
           var isMain = this._isMainSelected();
 
-          if (this._clickedDrawer.id === 'rightDrawer') {
+          if (this._movingDrawer.id === 'rightDrawer') {
             return Math.max(0, isMain ? this.width + deltaX : deltaX);
           } else {
             return Math.min(0, isMain ? deltaX - this.width : deltaX);
@@ -1118,7 +1100,7 @@ Custom property | Description | Default
               this._setPeeking(false);
             }
 
-            this._moveDrawer(this._clickedDrawer, this._translateXForDeltaX(dx));
+            this._moveDrawer(this._movingDrawer, this._translateXForDeltaX(dx));
           }
         },
 
@@ -1129,19 +1111,19 @@ Custom property | Description | Default
             this._setDragging(false);
             this._transition = true;
             sharedPanel = null;
-            this._moveDrawer(this._clickedDrawer, null);
+            this._moveDrawer(this._movingDrawer, null);
 
-            if (this._clickedDrawer.id === 'rightDrawer') {
+            if (this._movingDrawer.id === 'rightDrawer') {
               if (xDirection) {
                 this.closeRightDrawer();
-                this._clickedDrawer = null;
+                this._movingDrawer = null;
               } else {
                 this.openRightDrawer();
               }
             } else {
               if (!xDirection) {
                 this.closeLeftDrawer();
-                this._clickedDrawer = null;
+                this._movingDrawer = null;
               } else {
                 this.openLeftDrawer();
               }
