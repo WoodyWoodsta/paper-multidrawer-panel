@@ -16,7 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    
+
     <link rel="import" href="../../paper-styles/demo-pages.html">
     <link rel="import" href="../../paper-button/paper-button.html">
     <link rel="import" href="../paper-drawer-panel.html">
@@ -27,11 +27,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: var(--google-grey-100);
       }
 
-      #paperDrawerPanel [drawer] {
+      #paperDrawerPanel [left-drawer] {
         border-right: 1px solid var(--google-grey-300);
       }
 
-      #paperDrawerPanel[right-drawer] [drawer] {
+      #paperDrawerPanel [right-drawer] {
         border-left: 1px solid var(--google-grey-300);
       }
 
@@ -48,7 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <body unresolved>
 
     <paper-drawer-panel id="paperDrawerPanel">
-      <div drawer></div>
+      <div id="pdpDrawer" left-drawer></div>
       <div main>
         <div>
           <paper-button onclick="flipDrawer()" raised>flip drawer</paper-button>
@@ -64,15 +64,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         'use strict';
 
-        var DRAWER_ATTR = 'right-drawer';
+        var LEFT_DRAWER_ATTR = 'left-drawer';
+        var RIGHT_DRAWER_ATTR = 'right-drawer'
 
-        var pdp = document.getElementById('paperDrawerPanel');
+        var pdpDrawer = document.getElementById('pdpDrawer');
 
         global.flipDrawer = function() {
-          if (pdp.hasAttribute(DRAWER_ATTR)) {
-            pdp.removeAttribute(DRAWER_ATTR);
+          if (pdpDrawer.hasAttribute(LEFT_DRAWER_ATTR)) {
+            pdpDrawer.removeAttribute(LEFT_DRAWER_ATTR);
+            pdpDrawer.setAttribute(RIGHT_DRAWER_ATTR, '');
+          } else if (pdpDrawer.hasAttribute(RIGHT_DRAWER_ATTR)) {
+            pdpDrawer.removeAttribute(RIGHT_DRAWER_ATTR);
+            pdpDrawer.setAttribute(LEFT_DRAWER_ATTR, '');
           } else {
-            pdp.setAttribute(DRAWER_ATTR, '');
+            pdpDrawer.setAttribute(LEFT_DRAWER_ATTR, '');
           }
         }
 
