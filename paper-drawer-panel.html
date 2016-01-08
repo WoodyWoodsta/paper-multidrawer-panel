@@ -156,12 +156,12 @@ Custom property | Description | Default
       }
 
       .left-drawer > #leftDrawer {
-        z-index: -2;
+        z-index: 0;
         @apply(--paper-drawer-panel-left-drawer-container);
       }
 
       .right-drawer > #rightDrawer {
-        z-index: -2;
+        z-index: 0;
         left: auto;
         right: 0;
 
@@ -174,8 +174,6 @@ Custom property | Description | Default
         right: 0;
         left: 0;
         bottom: 0;
-
-        z-index: -1;
 
         @apply(--paper-drawer-panel-main-container);
       }
@@ -202,7 +200,7 @@ Custom property | Description | Default
         width: 100vw;
         height: 100vh;
         visibility: hidden;
-        z-index: 0;
+        z-index: 1;
         opacity: 0;
         transition: opacity ease-in-out 0.38s, visibility ease-in-out 0.38s;
         background-color: rgba(0, 0, 0, 0.3);
@@ -213,7 +211,7 @@ Custom property | Description | Default
       .narrow-layout > .drawer,
       .left-drawer-temporary > #leftDrawer,
       .right-drawer-temporary > #rightDrawer {
-        z-index: 0;
+        z-index: 2;
         will-change: transform;
       }
 
