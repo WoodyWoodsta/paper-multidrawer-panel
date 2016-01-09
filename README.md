@@ -5,7 +5,7 @@ _[Demo and API Docs](https://elements.polymer-project.org/elements/paper-drawer-
 
  -->
 
-##&lt;paper-drawer-panel&gt;
+##&lt;paper-multidrawer-panel&gt;
 
 Material design: [Navigation drawer](https://www.google.com/design/spec/patterns/navigation-drawer.html)
 
