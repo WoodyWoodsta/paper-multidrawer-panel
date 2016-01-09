@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "A responsive drawer panel with more than drawer",
   "authors": [
-    "The Polymer Authors"
+    "The Polymer Authors",
+    "WoodyWoodsta <woodywoodsta@gmail.com>"
   ],
   "keywords": [
     "web-components",

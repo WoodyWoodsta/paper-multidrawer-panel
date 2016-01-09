@@ -4,8 +4,9 @@
 _[Demo and API Docs](https://elements.polymer-project.org/elements/paper-drawer-panel)_
  -->
 
-<!-- ##&lt;paper-multidrawer-panel&gt; -->
-# <paper-multidrawer-panel>
+# &lt;paper-multidrawer-panel&gt;
+
+**Full API and DOCS [here](http://woodywoodsta.github.io/paper-multidrawer-panel/)**
 
 Material design: [Navigation drawer](https://www.google.com/design/spec/patterns/navigation-drawer.html)
 
@@ -114,3 +115,11 @@ Custom property | Description | Default
 `--paper-multidrawer-panel-main-container` | Mixin applied to main container | {}
 `--paper-multidrawer-panel-scrim-opacity` | Scrim opacity | 1
 `--paper-multidrawer-panel-scrim` | Mixin applied to scrim | {}
+
+---
+
+## Todo
+
+- [ ] Fix demo page
+- [ ] Add timing function mixin
+- [ ] Send a thanks to the polymer team :)
