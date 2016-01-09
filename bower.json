@@ -35,6 +35,7 @@
   "main": "paper-multidrawer-panel.html",
   "ignore": [
     "test",
-    ".travis.yml"  
+    ".travis.yml",
+    "bower_components"
   ]
 }
