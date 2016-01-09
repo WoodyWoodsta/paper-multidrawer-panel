@@ -15,9 +15,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!--
 Material design: [Navigation drawer](https://www.google.com/design/spec/patterns/navigation-drawer.html)
 
-`paper-drawer-panel` contains a one or two drawer panels and a main panel.  The drawer panels
+`paper-multidrawer-panel` contains a one or two drawer panels and a main panel.  The drawer panels
 and the main panel are side-by-side with drawers on the sides specified.  When the browser
-window size is smaller than the `responsiveWidth`, `paper-drawer-panel`
+window size is smaller than the `responsiveWidth`, `paper-multidrawer-panel`
 changes to narrow layout.  In narrow layout, both drawers will be stacked on top
 of the main panel.  The drawers will slide in/out to hide/reveal the main
 panel.  When the window is smaller than the `responsiveWidthLeft`, the left drawer
@@ -29,18 +29,18 @@ and `main` to indicate that the element is the main panel.
 
 Example:
 
-    <paper-drawer-panel>
+    <paper-multidrawer-panel>
       <div leftDrawer> Left drawer panel... </div>
       <div rightDrawer> Right drawer panel... </div>
       <div main> Main panel... </div>
-    </paper-drawer-panel>
+    </paper-multidrawer-panel>
 
 The drawer and the main panels are not scrollable.  You can set CSS overflow
 property on the elements to make them scrollable or use `paper-header-panel`.
 
 Example:
 
-    <paper-drawer-panel>
+    <paper-multidrawer-panel>
       <paper-header-panel leftDrawer>
         <paper-toolbar></paper-toolbar>
         <div> Drawer content... </div>
@@ -49,15 +49,15 @@ Example:
         <paper-toolbar></paper-toolbar>
         <div> Main content... </div>
       </paper-header-panel>
-    </paper-drawer-panel>
+    </paper-multidrawer-panel>
 
 An element that should toggle the left drawer or the right drawer will automatically
-do so if it's given the `paper-drawer-toggle-left` or `paper-drawer-toggle-right` attribute respectively.
+do so if it's given the `paper-multidrawer-toggle-left` or `paper-multidrawer-toggle-right` attribute respectively.
 Also this element will automatically be hidden in wide layout (if the drawers have not stacked).
 
 Example:
 
-    <paper-drawer-panel>
+    <paper-multidrawer-panel>
       <paper-header-panel leftDrawer>
         <paper-toolbar>
           <div>Application</div>
@@ -66,43 +66,43 @@ Example:
       </paper-header-panel>
       <paper-header-panel main>
         <paper-toolbar>
-          <paper-icon-button icon="menu" paper-drawer-toggle-left></paper-icon-button>
+          <paper-icon-button icon="menu" paper-multidrawer-toggle-left></paper-icon-button>
           <div>Title</div>
         </paper-toolbar>
         <div> Main content... </div>
       </paper-header-panel>
-    </paper-drawer-panel>
+    </paper-multidrawer-panel>
 
 ### Styling
 
 To change the main container:
 
-    paper-drawer-panel {
-      --paper-drawer-panel-main-container: {
+    paper-multidrawer-panel {
+      --paper-multidrawer-panel-main-container: {
         background-color: gray;
       };
     }
 
 To change the drawer container on the left:
 
-    paper-drawer-panel {
-      --paper-drawer-panel-left-drawer-container: {
+    paper-multidrawer-panel {
+      --paper-multidrawer-panel-left-drawer-container: {
         background-color: white;
       };
     }
 
 To change the drawer container on the right:
 
-    paper-drawer-panel {
-      --paper-drawer-panel-right-drawer-container: {
+    paper-multidrawer-panel {
+      --paper-multidrawer-panel-right-drawer-container: {
         background-color: white;
       };
     }
 
 To customize the scrim:
 
-    paper-drawer-panel {
-      --paper-drawer-panel-scrim: {
+    paper-multidrawer-panel {
+      --paper-multidrawer-panel-scrim: {
         background-color: red;
       };
     }
@@ -111,20 +111,20 @@ The following custom properties and mixins are available for styling:
 
 Custom property | Description | Default
 ----------------|-------------|----------
-`--paper-drawer-panel-drawer-container` | Mixin applied to drawer container | {}
-`--paper-drawer-panel-left-drawer-container` | Mixin applied to container when it's in the left side | {}
-`--paper-drawer-panel-right-drawer-container` | Mixin applied to container when it's in the right side | {}
-`--paper-drawer-panel-main-container` | Mixin applied to main container | {}
-`--paper-drawer-panel-scrim-opacity` | Scrim opacity | 1
-`--paper-drawer-panel-scrim` | Mixin applied to scrim | {}
+`--paper-multidrawer-panel-drawer-container` | Mixin applied to drawer container | {}
+`--paper-multidrawer-panel-left-drawer-container` | Mixin applied to container when it's in the left side | {}
+`--paper-multidrawer-panel-right-drawer-container` | Mixin applied to container when it's in the right side | {}
+`--paper-multidrawer-panel-main-container` | Mixin applied to main container | {}
+`--paper-multidrawer-panel-scrim-opacity` | Scrim opacity | 1
+`--paper-multidrawer-panel-scrim` | Mixin applied to scrim | {}
 
 @group Paper elements
-@element paper-drawer-panel
+@element paper-multidrawer-panel
 @demo demo/index.html
 @hero hero.svg
 -->
 
-<dom-module id="paper-drawer-panel">
+<dom-module id="paper-multidrawer-panel">
   <template>
     <style>
       :host {
@@ -147,7 +147,7 @@ Custom property | Description | Default
         -moz-box-sizing: border-box;
         box-sizing: border-box;
 
-        @apply(--paper-drawer-panel-drawer-container);
+        @apply(--paper-multidrawer-panel-drawer-container);
       }
 
       .transition > .drawer {
@@ -157,7 +157,7 @@ Custom property | Description | Default
 
       .left-drawer > #leftDrawer {
         z-index: 0;
-        @apply(--paper-drawer-panel-left-drawer-container);
+        @apply(--paper-multidrawer-panel-left-drawer-container);
       }
 
       .right-drawer > #rightDrawer {
@@ -165,7 +165,7 @@ Custom property | Description | Default
         left: auto;
         right: 0;
 
-        @apply(--paper-drawer-panel-right-drawer-container);
+        @apply(--paper-multidrawer-panel-right-drawer-container);
       }
 
       iron-selector > #main {
@@ -175,7 +175,7 @@ Custom property | Description | Default
         left: 0;
         bottom: 0;
 
-        @apply(--paper-drawer-panel-main-container);
+        @apply(--paper-multidrawer-panel-main-container);
       }
 
       .transition > #main {
@@ -205,7 +205,7 @@ Custom property | Description | Default
         transition: opacity ease-in-out 0.38s, visibility ease-in-out 0.38s;
         background-color: rgba(0, 0, 0, 0.3);
 
-        @apply(--paper-drawer-panel-scrim);
+        @apply(--paper-multidrawer-panel-scrim);
       }
 
       .narrow-layout > .drawer,
@@ -264,7 +264,7 @@ Custom property | Description | Default
       .peeking > #main > #scrim,
       .dragging > #main > #scrim {
         visibility: visible;
-        opacity: var(--paper-drawer-panel-scrim-opacity, 1);
+        opacity: var(--paper-multidrawer-panel-scrim-opacity, 1);
       }
 
       .narrow-layout > #main > * ,
@@ -289,9 +289,9 @@ Custom property | Description | Default
         right: 0;
       }
 
-      iron-selector:not(.narrow-layout) > #main ::content [paper-drawer-toggle],
-      iron-selector:not(.left-drawer-temporary) > #main ::content [paper-drawer-toggle-left],
-      iron-selector:not(.right-drawer-temporary) > #main ::content [paper-drawer-toggle-right] {
+      iron-selector:not(.narrow-layout) > #main ::content [paper-multidrawer-toggle],
+      iron-selector:not(.left-drawer-temporary) > #main ::content [paper-multidrawer-toggle-left],
+      iron-selector:not(.right-drawer-temporary) > #main ::content [paper-multidrawer-toggle-right] {
         display: none;
       }
     </style>
@@ -346,7 +346,7 @@ Custom property | Description | Default
     (function() {
       'use strict';
 
-      // This would be the only `paper-drawer-panel` in
+      // This would be the only `paper-multidrawer-panel` in
       // the whole app that can be in `dragging` state
       var sharedPanel = null;
 
@@ -363,7 +363,7 @@ Custom property | Description | Default
 
       Polymer({
 
-        is: 'paper-drawer-panel',
+        is: 'paper-multidrawer-panel',
 
         behaviors: [Polymer.IronResizableBehavior],
 
@@ -398,7 +398,7 @@ Custom property | Description | Default
         properties: {
 
           /**
-           * The panel to be selected when `paper-drawer-panel` changes to narrow
+           * The panel to be selected when `paper-multidrawer-panel` changes to narrow
            * layout.
            */
           defaultSelected: {
@@ -600,7 +600,7 @@ Custom property | Description | Default
            */
           leftDrawerToggleAttribute: {
             type: String,
-            value: 'paper-drawer-toggle-left'
+            value: 'paper-multidrawer-toggle-left'
           },
 
           /**
@@ -609,7 +609,7 @@ Custom property | Description | Default
            */
           rightDrawerToggleAttribute: {
             type: String,
-            value: 'paper-drawer-toggle-right'
+            value: 'paper-multidrawer-toggle-right'
           },
 
           /**

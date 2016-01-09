@@ -1,7 +1,7 @@
 {
-  "name": "paper-drawer-panel",
-  "version": "1.0.6",
-  "description": "A responsive drawer panel",
+  "name": "paper-multidrawer-panel",
+  "version": "1.0.0",
+  "description": "A responsive drawer panel with more than drawer",
   "authors": [
     "The Polymer Authors"
   ],
@@ -14,10 +14,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/PolymerElements/paper-drawer-panel.git"
+    "url": "git://github.com/WoodyWoodsta/paper-multidrawer-panel.git"
   },
   "license": "http://polymer.github.io/LICENSE.txt",
-  "homepage": "https://github.com/PolymerElements/paper-drawer-panel",
+  "homepage": "https://github.com/WoodyWoodsta/paper-multidrawer-panel",
   "dependencies": {
     "iron-media-query": "PolymerElements/iron-media-query#^1.0.0",
     "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.0",
@@ -32,6 +32,9 @@
     "web-component-tester": "polymer/web-component-tester#^3.4.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   },
-  "main": "paper-drawer-panel.html",
-  "ignore": []
+  "main": "paper-multidrawer-panel.html",
+  "ignore": [
+    "test",
+    ".travis.yml"  
+  ]
 }
