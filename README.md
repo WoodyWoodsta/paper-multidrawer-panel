@@ -2,10 +2,10 @@
 [![Build Status](https://travis-ci.org/PolymerElements/paper-drawer-panel.svg?branch=master)](https://travis-ci.org/PolymerElements/paper-drawer-panel)
 
 _[Demo and API Docs](https://elements.polymer-project.org/elements/paper-drawer-panel)_
-
  -->
 
-##&lt;paper-multidrawer-panel&gt;
+<!-- ##&lt;paper-multidrawer-panel&gt; -->
+# <paper-multidrawer-panel>
 
 Material design: [Navigation drawer](https://www.google.com/design/spec/patterns/navigation-drawer.html)
 
@@ -15,80 +15,94 @@ Use the attribute `leftDrawer` to indicate that the element is a drawer panel to
 
 Example:
 
-    <paper-multidrawer-panel>
-      <div leftDrawer> Left drawer panel... </div>
-      <div rightDrawer> Right drawer panel... </div>
-      <div main> Main panel... </div>
-    </paper-multidrawer-panel>
+```html
+<paper-multidrawer-panel>
+  <div leftDrawer> Left drawer panel... </div>
+  <div rightDrawer> Right drawer panel... </div>
+  <div main> Main panel... </div>
+</paper-multidrawer-panel>
+```
 
 The drawer and the main panels are not scrollable.  You can set CSS overflow property on the elements to make them scrollable or use `paper-header-panel`.
 
 Example:
 
-    <paper-multidrawer-panel>
-      <paper-header-panel leftDrawer>
-        <paper-toolbar></paper-toolbar>
-        <div> Drawer content... </div>
-      </paper-header-panel>
-      <paper-header-panel main>
-        <paper-toolbar></paper-toolbar>
-        <div> Main content... </div>
-      </paper-header-panel>
-    </paper-multidrawer-panel>
+```html
+<paper-multidrawer-panel>
+  <paper-header-panel leftDrawer>
+    <paper-toolbar></paper-toolbar>
+    <div> Drawer content... </div>
+  </paper-header-panel>
+  <paper-header-panel main>
+    <paper-toolbar></paper-toolbar>
+    <div> Main content... </div>
+  </paper-header-panel>
+</paper-multidrawer-panel>
+```
 
 An element that should toggle the left drawer or the right drawer will automatically do so if it's given the `paper-multidrawer-toggle-left` or `paper-multidrawer-toggle-right` attribute respectively. Also this element will automatically be hidden in wide layout (if the drawers have not stacked).
 
 Example:
 
-    <paper-multidrawer-panel>
-      <paper-header-panel leftDrawer>
-        <paper-toolbar>
-          <div>Application</div>
-        </paper-toolbar>
-        <div> Drawer content... </div>
-      </paper-header-panel>
-      <paper-header-panel main>
-        <paper-toolbar>
-          <paper-icon-button icon="menu" paper-multidrawer-toggle-left></paper-icon-button>
-          <div>Title</div>
-        </paper-toolbar>
-        <div> Main content... </div>
-      </paper-header-panel>
-    </paper-multidrawer-panel>
+```html
+<paper-multidrawer-panel>
+  <paper-header-panel leftDrawer>
+    <paper-toolbar>
+      <div>Application</div>
+    </paper-toolbar>
+    <div> Drawer content... </div>
+  </paper-header-panel>
+  <paper-header-panel main>
+    <paper-toolbar>
+      <paper-icon-button icon="menu" paper-multidrawer-toggle-left></paper-icon-button>
+      <div>Title</div>
+    </paper-toolbar>
+    <div> Main content... </div>
+  </paper-header-panel>
+</paper-multidrawer-panel>
+```
 
 ### Styling
 
 To change the main container:
 
-    paper-multidrawer-panel {
-      --paper-multidrawer-panel-main-container: {
-        background-color: gray;
-      };
-    }
+```css
+paper-multidrawer-panel {
+  --paper-multidrawer-panel-main-container: {
+    background-color: gray;
+  };
+}
+```
 
 To change the drawer container on the left:
 
-    paper-multidrawer-panel {
-      --paper-multidrawer-panel-left-drawer-container: {
-        background-color: white;
-      };
-    }
+```css
+paper-multidrawer-panel {
+  --paper-multidrawer-panel-left-drawer-container: {
+    background-color: white;
+  };
+}
+```
 
 To change the drawer container on the right:
 
-    paper-multidrawer-panel {
-      --paper-multidrawer-panel-right-drawer-container: {
-        background-color: white;
-      };
-    }
+```css
+paper-multidrawer-panel {
+  --paper-multidrawer-panel-right-drawer-container: {
+    background-color: white;
+  };
+}
+```
 
 To customize the scrim:
 
-    paper-multidrawer-panel {
-      --paper-multidrawer-panel-scrim: {
-        background-color: red;
-      };
-    }
+```css
+paper-multidrawer-panel {
+  --paper-multidrawer-panel-scrim: {
+    background-color: red;
+  };
+}
+```
 
 The following custom properties and mixins are available for styling:
 
