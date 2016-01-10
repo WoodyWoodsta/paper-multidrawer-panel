@@ -12,14 +12,14 @@ Material design: [Navigation drawer](https://www.google.com/design/spec/patterns
 
 `paper-multidrawer-panel` contains a one or two drawer panels and a main panel.  The drawer panels and the main panel are side-by-side with drawers on the sides specified.  When the browser window size is smaller than the `responsiveWidth`, `paper-multidrawer-panel` changes to narrow layout.  In narrow layout, both drawers will be stacked on top of the main panel.  The drawers will slide in/out to hide/reveal the main panel.  When the window is smaller than the `responsiveWidthLeft`, the left drawer will stack and slide in/out and so forth for the right drawer using `responsiveWidthRight`.
 
-Use the attribute `leftDrawer` to indicate that the element is a drawer panel to be placed on the left, `rightDrawer` to indicate that the element is a drawer panel on the right and `main` to indicate that the element is the main panel.
+Use the attribute `left-drawer` to indicate that the element is a drawer panel to be placed on the left, `right-drawer` to indicate that the element is a drawer panel on the right and `main` to indicate that the element is the main panel.
 
 Example:
 
 ```html
 <paper-multidrawer-panel>
-  <div leftDrawer> Left drawer panel... </div>
-  <div rightDrawer> Right drawer panel... </div>
+  <div left-drawer> Left drawer panel... </div>
+  <div right-drawer> Right drawer panel... </div>
   <div main> Main panel... </div>
 </paper-multidrawer-panel>
 ```
@@ -30,7 +30,7 @@ Example:
 
 ```html
 <paper-multidrawer-panel>
-  <paper-header-panel leftDrawer>
+  <paper-header-panel left-drawer>
     <paper-toolbar></paper-toolbar>
     <div> Drawer content... </div>
   </paper-header-panel>
@@ -47,7 +47,7 @@ Example:
 
 ```html
 <paper-multidrawer-panel>
-  <paper-header-panel leftDrawer>
+  <paper-header-panel left-drawer>
     <paper-toolbar>
       <div>Application</div>
     </paper-toolbar>
