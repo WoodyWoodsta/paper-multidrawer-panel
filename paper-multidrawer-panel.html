@@ -23,15 +23,15 @@ of the main panel.  The drawers will slide in/out to hide/reveal the main
 panel.  When the window is smaller than the `responsiveWidthLeft`, the left drawer
 will stack and slide in/out and so forth for the right drawer using `responsiveWidthRight`.
 
-Use the attribute `leftDrawer` to indicate that the element is a drawer panel to be
-placed on the left, `rightDrawer` to indicate that the element is a drawer panel on the right
+Use the attribute `left-drawer` to indicate that the element is a drawer panel to be
+placed on the left, `right-drawer` to indicate that the element is a drawer panel on the right
 and `main` to indicate that the element is the main panel.
 
 Example:
 
     <paper-multidrawer-panel>
-      <div leftDrawer> Left drawer panel... </div>
-      <div rightDrawer> Right drawer panel... </div>
+      <div left-drawer> Left drawer panel... </div>
+      <div right-drawer> Right drawer panel... </div>
       <div main> Main panel... </div>
     </paper-multidrawer-panel>
 
@@ -41,7 +41,7 @@ property on the elements to make them scrollable or use `paper-header-panel`.
 Example:
 
     <paper-multidrawer-panel>
-      <paper-header-panel leftDrawer>
+      <paper-header-panel left-drawer>
         <paper-toolbar></paper-toolbar>
         <div> Drawer content... </div>
       </paper-header-panel>
@@ -58,7 +58,7 @@ Also this element will automatically be hidden in wide layout (if the drawers ha
 Example:
 
     <paper-multidrawer-panel>
-      <paper-header-panel leftDrawer>
+      <paper-header-panel left-drawer>
         <paper-toolbar>
           <div>Application</div>
         </paper-toolbar>
