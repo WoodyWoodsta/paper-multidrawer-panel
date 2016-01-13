@@ -156,12 +156,12 @@ Custom property | Description | Default
       }
 
       .left-drawer > #leftDrawer {
-        z-index: 0;
+        z-index: 1;
         @apply(--paper-multidrawer-panel-left-drawer-container);
       }
 
       .right-drawer > #rightDrawer {
-        z-index: 0;
+        z-index: 1;
         left: auto;
         right: 0;
 
@@ -200,7 +200,7 @@ Custom property | Description | Default
         width: 100vw;
         height: 100vh;
         visibility: hidden;
-        z-index: 1;
+        /*z-index: 1;*/
         opacity: 0;
         transition: opacity ease-in-out 0.38s, visibility ease-in-out 0.38s;
         background-color: rgba(0, 0, 0, 0.3);
@@ -211,7 +211,7 @@ Custom property | Description | Default
       .narrow-layout > .drawer,
       .left-drawer-temporary > #leftDrawer,
       .right-drawer-temporary > #rightDrawer {
-        z-index: 2;
+        z-index: 3;
         will-change: transform;
       }
 
@@ -263,6 +263,7 @@ Custom property | Description | Default
       .right-drawer-temporary > #rightDrawer.iron-selected ~ #main > #scrim,
       .peeking > #main > #scrim,
       .dragging > #main > #scrim {
+        z-index: 2;
         visibility: visible;
         opacity: var(--paper-multidrawer-panel-scrim-opacity, 1);
       }
@@ -670,10 +671,10 @@ Custom property | Description | Default
 
           // Check to see if drawers exist & recompute mq
           this._set_leftDrawer(!!Polymer.dom(this.$.leftDrawerContent).getDistributedNodes().length);
-          this._responsiveChange(this.$.mqResponsiveWidthLeft.queryMatches, 'leftDrawerTemporary');
+          this._responsiveChange(this.$.mqResponsiveWidthLeft.queryMatches || this.forceLeftDrawerTemporary, 'leftDrawerTemporary');
 
           this._set_rightDrawer(!!Polymer.dom(this.$.rightDrawerContent).getDistributedNodes().length);
-          this._responsiveChange(this.$.mqResponsiveWidthRight.queryMatches, 'rightDrawerTemporary');
+          this._responsiveChange(this.$.mqResponsiveWidthRight.queryMatches || this.forceRightDrawerTemporary, 'rightDrawerTemporary');
         },
 
         /**
@@ -814,9 +815,7 @@ Custom property | Description | Default
                   this._setLeftDrawerTemporary(value);
                 }
 
-                if (this.leftDrawerTemporary) {
-                  this.selected = this.defaultSelected;
-                }
+                this.selected = this.defaultSelected;
 
                 this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
                 this.fire('paper-responsive-change', {leftDrawerTemporary: this.leftDrawerTemporary});
@@ -831,9 +830,7 @@ Custom property | Description | Default
                   this._setRightDrawerTemporary(value);
                 }
 
-                if (this.rightDrawerTemporary) {
-                  this.selected = this.defaultSelected;
-                }
+                this.selected = this.defaultSelected;
 
                 this.setScrollDirection(this._swipeAllowed() ? 'y' : 'all');
                 this.fire('paper-responsive-change', {rightDrawerTemporary: this.rightDrawerTemporary});
