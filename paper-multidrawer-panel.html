@@ -220,19 +220,20 @@ Custom property | Description | Default
       .narrow-layout > .drawer,
       .left-drawer-temporary > #leftDrawer,
       .right-drawer-temporary > #rightDrawer {
-        /*z-index: 3;*/
         will-change: transform;
       }
 
       .narrow-layout > #leftDrawer.iron-selected,
-      .left-drawer-temporary > #leftDrawer.iron-selected {
-        z-index: 4;
+      .left-drawer-temporary > #leftDrawer.iron-selected,
+      iron-selector[last-interacted-drawer="left"].peeking > #leftDrawer,
+      iron-selector[last-interacted-drawer="left"].dragging > #leftDrawer {
         box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
       .narrow-layout > #rightDrawer.iron-selected,
-      .right-drawer-temporary > #rightDrawer.iron-selected {
-        z-index: 4;
+      .right-drawer-temporary > #rightDrawer.iron-selected,
+      iron-selector[last-interacted-drawer="right"].peeking > #rightDrawer,
+      iron-selector[last-interacted-drawer="right"].dragging > #rightDrawer {
         box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
@@ -262,41 +263,33 @@ Custom property | Description | Default
       .left-drawer-temporary.peeking > #leftDrawer:not(.iron-selected),
       .right-drawer-temporary.dragging > #rightDrawer:not(.iron-selected),
       .right-drawer-temporary.peeking > #rightDrawer:not(.iron-selected) {
-        z-index: 4;
         visibility: visible;
-      }
-
-      iron-selector:not(.left-drawer-temporary) > #rightDrawer {
-        z-index: 4;
-      }
-
-      iron-selector:not(.left-drawer-temporary) > #rightScrim {
-        z-index: 3;
-      }
-
-      iron-selector:not(.right-drawer-temporary) > #leftDrawer {
-        z-index: 4;
-      }
-
-      iron-selector:not(.right-drawer-temporary) > #leftScrim {
-        z-index: 3;
       }
 
       .narrow-layout > #main {
         padding: 0;
       }
 
-      .narrow-layout > #leftDrawer.iron-selected + #leftScrim,
-      .narrow-layout > #rightDrawer.iron-selected + #rightScrim,
-      .left-drawer-temporary > #leftDrawer.iron-selected + #leftScrim,
-      .right-drawer-temporary > #rightDrawer.iron-selected + #rightScrim,
-      .peeking > #leftDrawer.iron-selected + #leftScrim,
-      .peeking > #rightDrawer.iron-selected + #rightScrim,
-      .dragging > #leftDrawer.iron-selected + #leftScrim,
-      .dragging > #rightDrawer.iron-selected + #rightScrim {
-        z-index: 3;
+      .narrow-layout > #leftDrawer.iron-selected ~ #leftScrim,
+      .narrow-layout > #rightDrawer.iron-selected ~ #rightScrim,
+      .left-drawer-temporary > #leftDrawer.iron-selected ~ #leftScrim,
+      .right-drawer-temporary > #rightDrawer.iron-selected ~ #rightScrim,
+      iron-selector[last-interacted-drawer="left"].peeking > #leftScrim,
+      iron-selector[last-interacted-drawer="right"].peeking > #rightScrim,
+      iron-selector[last-interacted-drawer="left"].dragging > #leftScrim,
+      iron-selector[last-interacted-drawer="right"].dragging > #rightScrim {
         visibility: visible;
         opacity: var(--paper-multidrawer-panel-scrims-opacity, 1);
+      }
+
+      iron-selector[last-interacted-drawer="left"] > #leftDrawer,
+      iron-selector[last-interacted-drawer="right"] > #rightDrawer {
+        z-index: 4;
+      }
+
+      iron-selector[last-interacted-drawer="left"] > #leftScrim,
+      iron-selector[last-interacted-drawer="right"] > #rightScrim {
+        z-index: 3;
       }
 
       .narrow-layout > #main > * ,
@@ -350,7 +343,8 @@ Custom property | Description | Default
         attr-for-selected="id"
         class$="[[_computeIronSelectorClass(narrow, _transition, _leftDrawer, _rightDrawer, dragging, peeking, leftDrawerTemporary, rightDrawerTemporary)]]"
         activate-event=""
-        selected="[[selected]]">
+        selected="[[selected]]"
+        last-interacted-drawer$="[[_lastInteractedDrawer]]">
 
       <div id="leftDrawer" class="drawer"
           hidden$="[[!_leftDrawer]]"
@@ -680,6 +674,15 @@ Custom property | Description | Default
             type: Object,
             value: null
           },
+
+          /**
+           * The drawer that was interacted with last
+           */
+          _lastInteractedDrawer: {
+            type: String,
+            value: null,
+            readOnly: true
+          }
         },
 
         listeners: {
@@ -742,6 +745,7 @@ Custom property | Description | Default
          */
         openLeftDrawer: function() {
           if (this._leftDrawer) {
+            this._set_lastInteractedDrawer('left');
             this.selected = 'leftDrawer';
             this._movingDrawer = this.$.leftDrawer;
           }
@@ -754,6 +758,7 @@ Custom property | Description | Default
          */
         openRightDrawer: function() {
           if (this._rightDrawer) {
+            this._set_lastInteractedDrawer('right');
             this.selected = 'rightDrawer';
             this._movingDrawer = this.$.rightDrawer;
           }
@@ -781,7 +786,7 @@ Custom property | Description | Default
 
         _computeIronSelectorClass: function(narrow, transition, leftDrawer, rightDrawer, dragging, peeking, leftDrawerTemporary, rightDrawerTemporary) {
           return classNames({
-            dragging: dragging,
+            'dragging': dragging,
             'narrow-layout': narrow,
             'left-drawer': leftDrawer,
             'right-drawer': rightDrawer,
@@ -942,7 +947,7 @@ Custom property | Description | Default
         _downHandler: function(event) {
           var edge = this._isEdgeTouch(event);
 
-          if (!this.dragging && this._isMainSelected() && !!edge && !sharedPanel) {
+          if (!(this.dragging) && this._isMainSelected() && !!edge && !sharedPanel) {
             this._startEdgePeek(edge);
 
             // Cancel selection
@@ -984,8 +989,10 @@ Custom property | Description | Default
           if (!this.disableEdgeSwipe && this._swipeAllowed()) {
             // Decide which side is being touched
             if ((x <= this.edgeSwipeSensitivity) && this.leftDrawerTemporary) {
+              this._set_lastInteractedDrawer('left');
               return 'left';
             } else if ((x >= this.offsetWidth - this.edgeSwipeSensitivity) && this.rightDrawerTemporary) {
+              this._set_lastInteractedDrawer('right');
               return 'right';
             }
           }
@@ -1059,6 +1066,7 @@ Custom property | Description | Default
             var xDirection = event.detail.dx > 0;
 
             this._setDragging(false);
+
             this._transition = true;
             sharedPanel = null;
             this._moveDrawer(this._movingDrawer, null);
