@@ -718,7 +718,7 @@ Custom property | Description | Default
          * @method toggleLeftPanel
          */
         toggleLeftPanel: function() {
-          if (this._isMainSelected()) {
+          if (this._isMainSelected() || this._isRightDrawerSelected()) {
             this.openLeftDrawer();
           } else {
             this.closeDrawer();
@@ -731,7 +731,7 @@ Custom property | Description | Default
          * @method toggleRightPanel
          */
         toggleRightPanel: function() {
-          if (this._isMainSelected()) {
+          if (this._isMainSelected() || this._isLeftDrawerSelected()) {
             this.openRightDrawer();
           } else {
             this.closeDrawer();
@@ -920,6 +920,14 @@ Custom property | Description | Default
 
         _isMainSelected: function() {
           return this.selected === 'main';
+        },
+
+        _isLeftDrawerSelected: function() {
+          return this.selected === 'leftDrawer';
+        },
+
+        _isRightDrawerSelected: function() {
+          return this.selected === 'rightDrawer';
         },
 
         _onTap: function(event) {
