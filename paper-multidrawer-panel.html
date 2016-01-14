@@ -434,9 +434,17 @@ Custom property | Description | Default
           },
 
           /**
-           * If true, swipe from the edge is disabled.
+           * If true, swipe from the left edge is disabled.
            */
-          disableEdgeSwipe: {
+          disableLeftEdgeSwipe: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * If true, swipe from the right edge is disabled.
+           */
+          disableRightEdgeSwipe: {
             type: Boolean,
             value: false
           },
@@ -718,10 +726,12 @@ Custom property | Description | Default
          * @method toggleLeftPanel
          */
         toggleLeftPanel: function() {
-          if (this._isMainSelected()) {
-            this.openLeftDrawer();
-          } else {
-            this.closeDrawer();
+          if (this.leftDrawerTemporary) {
+            if (this._isMainSelected() || this._isRightDrawerSelected()) {
+              this.openLeftDrawer();
+            } else {
+              this.closeDrawer();
+            }
           }
         },
 
@@ -731,10 +741,12 @@ Custom property | Description | Default
          * @method toggleRightPanel
          */
         toggleRightPanel: function() {
-          if (this._isMainSelected()) {
-            this.openRightDrawer();
-          } else {
-            this.closeDrawer();
+          if (this.rightDrawerTemporary) {
+            if (this._isMainSelected() || this._isLeftDrawerSelected()) {
+              this.openRightDrawer();
+            } else {
+              this.closeDrawer();
+            }
           }
         },
 
@@ -827,9 +839,9 @@ Custom property | Description | Default
           return (forceNarrow || forceTemporary) ? '' : '(max-width: ' + queryWidth + ')';
         },
 
-        _computeSwipeOverlayHidden: function(narrow, disableEdgeSwipe) {
-          return !narrow || disableEdgeSwipe;
-        },
+        // _computeSwipeOverlayHidden: function(narrow, disableEdgeSwipe) {
+        //   return !narrow || disableEdgeSwipe;
+        // },
 
         _responsiveChange: function(value, source) {
           switch (source) {
@@ -922,6 +934,14 @@ Custom property | Description | Default
           return this.selected === 'main';
         },
 
+        _isLeftDrawerSelected: function() {
+          return this.selected === 'leftDrawer';
+        },
+
+        _isRightDrawerSelected: function() {
+          return this.selected === 'rightDrawer';
+        },
+
         _onTap: function(event) {
           var targetElement = Polymer.dom(event).localTarget;
 
@@ -986,12 +1006,12 @@ Custom property | Description | Default
         _isEdgeTouch: function(event) {
           var x = event.detail.x;
 
-          if (!this.disableEdgeSwipe && this._swipeAllowed()) {
+          if (this._swipeAllowed()) {
             // Decide which side is being touched
-            if ((x <= this.edgeSwipeSensitivity) && this.leftDrawerTemporary) {
+            if ((x <= this.edgeSwipeSensitivity) && this.leftDrawerTemporary && !this.disableLeftEdgeSwipe) {
               this._set_lastInteractedDrawer('left');
               return 'left';
-            } else if ((x >= this.offsetWidth - this.edgeSwipeSensitivity) && this.rightDrawerTemporary) {
+            } else if ((x >= this.offsetWidth - this.edgeSwipeSensitivity) && this.rightDrawerTemporary && !this.disableRightEdgeSwipe) {
               this._set_lastInteractedDrawer('right');
               return 'right';
             }
